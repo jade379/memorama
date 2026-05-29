@@ -46,14 +46,21 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 40px;
-            color: #FFFFFF;
-            font-weight: bold;
             transition: transform 0.3s ease;
+            overflow: hidden; /* Para que la imagen no se salga */
+        }
+        .tarjeta img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none; /* Oculto al inicio */
         }
         .tarjeta.descubierta {
             background-color: #32CD32; /* Verde lima */
             transform: rotateY(180deg);
+        }
+        .tarjeta.descubierta img {
+            display: block; /* Mostrar imagen al voltear */
         }
         .tarjeta.acertada {
             background-color: #FF0000; /* Rojo intenso */
@@ -94,9 +101,19 @@
     </div>
 
     <script>
-        // Emojis de caricaturas infantiles
-        const imagenes = ['🐱', '🐶', '🐭', '🐰', '🐸', '🐵', '🐯', '🐻'];
-        let cartas = [...imagenes, ...imagenes]; // Duplicar para formar parejas
+        // RUTA DE TUS IMÁGENES (deben estar en carpeta "imagenes")
+        const imagenes = [
+            'imagenes/img1.png',
+            'imagenes/img2.png',
+            'imagenes/img3.png',
+            'imagenes/img4.png',
+            'imagenes/img5.png',
+            'imagenes/img6.png',
+            'imagenes/img7.png',
+            'imagenes/img8.png'
+        ];
+
+        let cartas = [...imagenes, ...imagenes]; // Duplicar para parejas
         let cartasVolteadas = [];
         let cartasAcertadas = [];
         let bloqueoTablero = false;
@@ -112,11 +129,18 @@
             tablero.innerHTML = '';
             cartas = mezclar(cartas);
             
-            cartas.forEach((imagen, indice) => {
+            cartas.forEach((rutaImagen, indice) => {
                 const tarjeta = document.createElement('div');
                 tarjeta.classList.add('tarjeta');
                 tarjeta.dataset.indice = indice;
-                tarjeta.dataset.imagen = imagen;
+                tarjeta.dataset.imagen = rutaImagen;
+
+                // Agregar etiqueta de imagen
+                const img = document.createElement('img');
+                img.src = rutaImagen;
+                img.alt = 'Caricatura';
+                tarjeta.appendChild(img);
+
                 tarjeta.onclick = () => voltearTarjeta(tarjeta);
                 tablero.appendChild(tarjeta);
             });
@@ -124,14 +148,11 @@
 
         // Voltear tarjeta
         function voltearTarjeta(tarjeta) {
-            // Evitar voltear si está bloqueado, ya está acertada o es la misma tarjeta
-            if (bloqueoTablero || tarjeta.classList.contains('acertada') || cartasVolteadas.length.includes(tarjeta)) return;
+            if (bloqueoTablero || tarjeta.classList.contains('acertada') || cartasVolteadas.includes(tarjeta)) return;
 
             tarjeta.classList.add('descubierta');
-            tarjeta.textContent = tarjeta.dataset.imagen;
             cartasVolteadas.push(tarjeta);
 
-            // Comprobar si hay dos cartas volteadas
             if (cartasVolteadas.length === 2) {
                 bloqueoTablero = true;
                 comprobarPareja();
@@ -150,19 +171,15 @@
                 cartasVolteadas = [];
                 bloqueoTablero = false;
 
-                // Verificar si se terminó el juego
                 if (cartasAcertadas.length === cartas.length) {
                     document.getElementById('mensaje').textContent = '🎉 ¡GANASTE! 🎉 Lo hiciste genial';
                     document.getElementById('mensaje').style.backgroundColor = '#FF0000';
                     document.getElementById('mensaje').style.color = '#FFFFFF';
                 }
             } else {
-                // Voltear de nuevo después de un momento
                 setTimeout(() => {
                     tarjeta1.classList.remove('descubierta');
-                    tarjeta1.textContent = '';
                     tarjeta2.classList.remove('descubierta');
-                    tarjeta2.textContent = '';
                     cartasVolteadas = [];
                     bloqueoTablero = false;
                 }, 1000);
